@@ -1,6 +1,6 @@
 # DBDeploy PHP
 
-[![Build Status](https://travis-ci.org/beberlei/dbdeploy-php.svg)](https://travis-ci.org/beberlei/dbdeploy-php)
+[![Build Status](https://travis-ci.org/beberlei/dbdeploy-php.svg?branch=master)](https://travis-ci.org/beberlei/dbdeploy-php)
 
 This is a clone of [DBDeploy](http://dbdeploy.com) for PHP using Doctrine DBAL
 as database abstraction.
