@@ -11,5 +11,6 @@ env:
 
 before_script:
     - mysql -uroot -e "CREATE DATABASE dbdeploy" 
+    - composer install
 
 script: phpunit
