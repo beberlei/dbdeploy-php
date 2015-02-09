@@ -6,8 +6,5 @@
     "require": {
         "doctrine/dbal": "~2.5"
     },
-    "require-dev": {
-        "phpunit/phpunit": "@stable"
-    },
     "bin": ["bin/dbdeploy-migrate.php"]
 }

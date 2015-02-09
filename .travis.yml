@@ -12,4 +12,4 @@ env:
 before_script:
     - mysql -uroot -e "CREATE DATABASE dbdeploy" 
 
-script: ./vendor/bin/phpunit
+script: phpunit
