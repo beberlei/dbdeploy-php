@@ -1,5 +1,6 @@
 {
     "name": "beberlei/dbdeploy-php",
+    "license": "MIT",
     "autoload": {
         "psr-0": {"DBDeployPHP": "src/"}
     },
