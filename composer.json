@@ -1,0 +1,13 @@
+{
+    "name": "beberlei/dbdeploy-php",
+    "autoload": {
+        "psr-0": {"DBDeployPHP": "src/"}
+    },
+    "require": {
+        "doctrine/dbal": "~2.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "@stable"
+    },
+    "bin": ["bin/dbdeploy-migrate.php"]
+}
