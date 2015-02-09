@@ -11,6 +11,9 @@
  * to kontakt@beberlei.de so I can send you a copy immediately.
  */
 
+use DBDeployPHP\DBDeploy;
+use Doctrine\DBAL\DriverManager;
+
 $files  = array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php');
 $loader = null;
 
@@ -33,6 +36,11 @@ if (!isset($argv[1])) {
     throw new RuntimeException("Missing schema directory.");
 }
 
+$directory = $argv[1];
+if (strpos($directory, '/') !== 0) {
+    $directory = getcwd() . '/' . $directory;
+}
+
 $connection = DriverManager::getConnection(array('url' => $_SERVER['DATABASE_URL']));
-$migrator = new DBDeploy($connection, $argv[1]);
+$migrator = new DBDeploy($connection, $directory);
 $migrator->migrate();

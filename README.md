@@ -35,6 +35,11 @@ use DBDeployPHP\DBDeploy;
 $dbDeploy = new DBDeploy($connection, $schemaDirectory);
 $appliedMigrations = $dbDeploy->migrate();
 ```
+## CLI
+
+You need environment variable `DATABASE_URL` present with the format: `mysql://user:password@host/dbname`:
+
+    $ php vendor/bin/dbdeploy-migrate.php src/schema
 
 ## Limitations
 
