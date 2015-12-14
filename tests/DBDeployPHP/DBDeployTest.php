@@ -3,21 +3,36 @@
 namespace DBDeployPHP;
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\ConnectionException;
 
 class DBDeployTest extends \PHPUnit_Framework_TestCase
 {
+    static private $databaseName = 'dbdeploy_tests';
+
+    /**
+     * @return \Doctrine\DBAL\Connection
+     */
+    private function createConnection()
+    {
+        if (!isset($_SERVER['DBDEPLOY_TEST_DATABASE_URL'])) {
+            $this->markTestSkipped('Requires DBDEPLOY_TEST_DATABASE_URL env variable for a connection (not directly to a database)');
+        }
+
+        $connection = DriverManager::getConnection(array(
+            'url' => $_SERVER['DBDEPLOY_TEST_DATABASE_URL'],
+        ));
+        $connection->exec('CREATE DATABASE IF NOT EXISTS ' . self::$databaseName);
+        $connection->exec('USE ' . self::$databaseName);
+
+        return $connection;
+    }
+
     /**
      * @test
      */
     public function it_migrates()
     {
-        if (!isset($_SERVER['DATABASE_URL'])) {
-            $this->markTestSkipped("Missing DATABASE_URL export.");
-        }
-
-        $connection = DriverManager::getConnection(array(
-            'url' => $_SERVER['DATABASE_URL'],
-        ));
+        $connection = $this->createConnection();
         $schemaManager = $connection->getSchemaManager();
 
         $schemaManager->tryMethod('dropTable', 'foo');
@@ -52,13 +67,7 @@ class DBDeployTest extends \PHPUnit_Framework_TestCase
      */
     public function it_disallows_duplicate_revisions()
     {
-        if (!isset($_SERVER['DATABASE_URL'])) {
-            $this->markTestSkipped("Missing DATABASE_URL export.");
-        }
-
-        $connection = DriverManager::getConnection(array(
-            'url' => $_SERVER['DATABASE_URL'],
-        ));
+        $connection = $this->createConnection();
 
         $this->setExpectedException('RuntimeException', "Duplicate revision number '1' is not allowed.");
 
@@ -71,13 +80,7 @@ class DBDeployTest extends \PHPUnit_Framework_TestCase
      */
     public function it_disallows_undo_dbdeploy_files()
     {
-        if (!isset($_SERVER['DATABASE_URL'])) {
-            $this->markTestSkipped("Missing DATABASE_URL export.");
-        }
-
-        $connection = DriverManager::getConnection(array(
-            'url' => $_SERVER['DATABASE_URL'],
-        ));
+        $connection = $this->createConnection();
 
         $this->setExpectedException('RuntimeException', 'No support for DBDeploy "--//@UNDO" feature.');
 
@@ -90,13 +93,7 @@ class DBDeployTest extends \PHPUnit_Framework_TestCase
      */
     public function it_natuarlly_sorts()
     {
-        if (!isset($_SERVER['DATABASE_URL'])) {
-            $this->markTestSkipped("Missing DATABASE_URL export.");
-        }
-
-        $connection = DriverManager::getConnection(array(
-            'url' => $_SERVER['DATABASE_URL'],
-        ));
+        $connection = $this->createConnection();
         $schemaManager = $connection->getSchemaManager();
 
         $schemaManager->tryMethod('dropTable', 'foo');

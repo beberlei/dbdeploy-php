@@ -47,18 +47,18 @@ class DBDeploy
     }
 
     /**
-     * Migrate database to new version comparing changelog table and schema directory.
+     * Return Current Migration Status of the database.
      *
-     * @return array<string,array>
+     * @return MigrationStatus
      */
-    public function migrate()
+    public function getCurrentStatus()
     {
         $schemaManager = $this->connection->getSchemaManager();
         $tables = $schemaManager->listTableNames();
 
         if (!in_array('changelog', $tables)) {
             $table = new \Doctrine\DBAL\Schema\Table('changelog');
-            $table->addColumn('change_number', 'integer', array('autoincrement' => true));
+            $table->addColumn('change_number', 'integer');
             $table->addColumn('complete_dt', 'datetime', array(
                 'columnDefinition' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
             ));
@@ -79,15 +79,40 @@ class DBDeploy
             }
         }
 
-        foreach ($applyMigrations as $revision => $data) {
+        return new MigrationStatus($allMigrations, $appliedMigrations, $applyMigrations);
+    }
+
+    /**
+     * Migrate database to new version comparing changelog table and schema directory.
+     *
+     * @return array<string,array>
+     */
+    public function migrate()
+    {
+        $status = $this->getCurrentStatus();
+        $this->apply($status);
+
+        return $status->getApplyMigrations();
+    }
+
+    /**
+     * Apply a migration status with unapplied changes to the database.
+     *
+     * @param MigrationStatus $status
+     */
+    public function apply(MigrationStatus $status)
+    {
+        foreach ($status->getApplyMigrations() as $revision => $data) {
             $this->connection->exec($data['sql']);
             $this->connection->insert(
                 'changelog',
-                array('description' => $data['description'], 'applied_by' => $data['applied_by'])
+                array(
+                    'change_number' => $data['change_number'],
+                    'description' => $data['description'],
+                    'applied_by' => $data['applied_by']
+                )
             );
         }
-
-        return $applyMigrations;
     }
 
     private function getAllMigrations($path)
@@ -110,6 +135,7 @@ class DBDeploy
             }
 
             $migrations[$revision] = array(
+                'change_number' => $revision,
                 'sql' => $sql,
                 'file' => $file,
                 'description' => $basefile,
